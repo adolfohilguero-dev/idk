@@ -42,3 +42,4 @@ jobs:
         with:
           name: chuleta-smx-apk
           path: build_app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
