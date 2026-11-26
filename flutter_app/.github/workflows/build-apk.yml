@@ -1,0 +1,44 @@
+name: Compilar APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Crear proyecto base y copiar los archivos de la app
+        run: |
+          flutter create --org com.smx --project-name chuleta_smx build_app
+          rm -rf build_app/test
+          cp -r flutter_app/lib flutter_app/assets flutter_app/pubspec.yaml flutter_app/patch_android.py build_app/
+
+      - name: Parchear Android, dependencias e icono
+        working-directory: build_app
+        run: |
+          python3 patch_android.py
+          flutter pub get
+          dart run flutter_launcher_icons
+
+      - name: Compilar APK release
+        working-directory: build_app
+        run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chuleta-smx-apk
+          path: build_app/build/app/outputs/flutter-apk/app-release.apk
