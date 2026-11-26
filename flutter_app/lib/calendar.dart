@@ -20,7 +20,9 @@ class _CalendarTabState extends State<CalendarTab> {
     _sel = t;
   }
 
-  bool _match(Ev e) => _filter == 'all' || e.m == _filter;
+  bool _pastExam(Ev e) => e.exam && e.e.isBefore(dateOnly(DateTime.now()));
+
+  bool _match(Ev e) => (_filter == 'all' || e.m == _filter) && !_pastExam(e);
 
   List<Ev> _forDay(DateTime d) =>
       Data.events.where((e) => _match(e) && e.coversDay(d)).toList();
